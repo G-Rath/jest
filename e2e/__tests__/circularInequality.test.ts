@@ -25,13 +25,48 @@ afterEach(() => {
   cleanup(tempDir);
 });
 
-test.skip('handles circular inequality properly', async () => {
+test('handles circular inequality properly', async () => {
   const testFileContent = `
     it('test', () => {
       const foo = {};
       foo.ref = foo;
 
       expect(foo).toEqual({});
+    });
+  `;
+
+  writeFiles(tempDir, {
+    '__tests__/test-1.js': testFileContent,
+    '__tests__/test-2.js': testFileContent,
+  });
+
+  const {end, waitUntil} = runContinuous(
+    tempDir,
+    ['--no-watchman', '--watch-all'],
+    // timeout in case the `waitUntil` below doesn't fire
+    {stripAnsi: true, timeout: 5000},
+  );
+
+  await waitUntil(({stderr}) => stderr.includes('Ran all test suites.'));
+
+  const {stderr} = await end();
+
+  const {summary, rest} = extractSortedSummary(stderr);
+  expect(rest).toMatchSnapshot();
+  expect(summary).toMatchSnapshot();
+});
+
+test('handles circular inequality in errors properly', async () => {
+  const testFileContent = `
+    it('test', () => {
+      const error = new Error();
+      error.prop = error;
+      const foo = {};
+      foo.ref = foo;
+
+      error.foo = foo;
+
+      throw error;
     });
   `;
 

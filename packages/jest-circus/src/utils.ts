@@ -358,10 +358,14 @@ export const makeSingleTestResult = (
 
   const errorsDetailed = test.errors.map(_getError);
 
+  writeDebug(errorsDetailed);
+
+const flatted = require('flatted');
+
   return {
     duration: test.duration,
     errors: errorsDetailed.map(getErrorStack),
-    errorsDetailed,
+    errorsDetailed: flatted.stringify(errorsDetailed),//.map(serializeError),
     invocations: test.invocations,
     location,
     retryReasons: test.retryReasons.map(_getError).map(getErrorStack),
@@ -369,6 +373,28 @@ export const makeSingleTestResult = (
     testPath: Array.from(testPath),
   };
 };
+
+const writeDebug = data => {
+  const flatted = require('flatted');
+  const myFS = require('fs');
+  const file = '/tmp/jest-hack-output-2.txt';
+
+ myFS.appendFileSync(file, flatted.stringify(data) + "\n")
+//  myFS.appendFileSync(file, JSON.stringify(data) + "\n")
+}
+
+const serializeError = (error: Error): Error => {
+  if ('matcherResult' in error) {
+    return error;
+  }
+
+  const newError = new Error(error.message);
+
+  newError.stack = error.stack;
+  newError.name = error.name;
+
+  return newError;
+}
 
 const makeTestResults = (
   describeBlock: Circus.DescribeBlock,

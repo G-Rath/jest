@@ -15,6 +15,19 @@ import type {
 } from '@jest/test-result';
 import type {ReporterConstructor} from './TestScheduler';
 
+const flatted = require('flatted');
+
+type PackedTestResult = Omit<TestResult, 'failureDetails'> & {
+  failureDetails: string;
+};
+
+const unpackTestResult = (testResult: PackedTestResult): TestResult => {
+  return {
+    ...testResult,
+    failureDetails: flatted.parse(testResult.failureDetails),
+  };
+};
+
 export default class ReporterDispatcher {
   private _reporters: Array<Reporter>;
 
@@ -34,9 +47,11 @@ export default class ReporterDispatcher {
 
   async onTestFileResult(
     test: Test,
-    testResult: TestResult,
+    testResult1: TestResult,
     results: AggregatedResult,
   ): Promise<void> {
+    //const testResult = flatted.parse(testResult1);
+    const testResult = unpackTestResult(testResult1);
     for (const reporter of this._reporters) {
       if (reporter.onTestFileResult) {
         await reporter.onTestFileResult(test, testResult, results);

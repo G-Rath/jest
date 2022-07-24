@@ -1,5 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`handles circular inequality in errors properly 1`] = `
+"FAIL __tests__/test-1.js
+  ● test
+
+
+
+      1 | it('test', () => {
+    > 2 |   const error = new Error();
+        |                 ^
+      3 |   error.prop = error;
+      4 |   const foo = {};
+      5 |   foo.ref = foo;
+
+      at Object.<anonymous> (__tests__/test-1.js:2:17)
+
+FAIL __tests__/test-2.js
+  ● test
+
+
+
+      1 | it('test', () => {
+    > 2 |   const error = new Error();
+        |                 ^
+      3 |   error.prop = error;
+      4 |   const foo = {};
+      5 |   foo.ref = foo;
+
+      at Object.<anonymous> (__tests__/test-2.js:2:17)"
+`;
+
+exports[`handles circular inequality in errors properly 2`] = `
+"Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        <<REPLACED>>
+Ran all test suites."
+`;
+
 exports[`handles circular inequality properly 1`] = `
 "FAIL __tests__/test-1.js
   ● test
